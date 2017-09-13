@@ -28,7 +28,6 @@ from kivy.uix.label import Label
 from kivy.lang import Builder
 
 from math import pi, cos, sin
-#from time import time
 
 
 def ellipse(u, v, a, b, angle):
@@ -105,7 +104,7 @@ class CanvasGauge(Widget):
             self._needles_props.append({'color':  color,
                                       'width': width,
                                       'length': length})
-            self._needles.append(None)
+            self._needles.append(InstructionGroup())
 
         self.canvas.clear()
         x0, y0 = self.pos
@@ -216,31 +215,27 @@ class CanvasGauge(Widget):
             # Not fully initialized
             return
 
-#        print('update_values:', self.values, end=' ')
-#        t0 = time()
         for i, value in enumerate(self.values):
              if self._previous_values[i] == value:
                  continue
              self._previous_values[i] = value
-             if self._needles[i] is not None:
-                 self._needles[i].clear()
-             needle = self._needles_props[i]
+             self.canvas.remove(self._needles[i])
+             needle_props = self._needles_props[i]
              x1, y1 = ellipse(self._x0,
                               self._y0,
-                              (self._e_width - 20) * needle['length'],
-                              (self._e_height - 20) * needle['length'],
+                              (self._e_width - 20) * needle_props['length'],
+                              (self._e_height - 20) * needle_props['length'],
                               self.begin - (self._scale * (value - self.mini)))
              self._needles[i] = InstructionGroup()
-             self._needles[i].add(needle['color'])
+             self._needles[i].add(needle_props['color'])
              self._needles[i].add(Line(points = (x1,
                                                  y1,
                                                  self._x0,
                                                  self._y0),
-                                     width = needle['width'],
+                                     width = needle_props['width'],
                                      cap = 'round',
                                      close = False))
              self.canvas.add(self._needles[i])
-#        print(' -> took: %.2f ms' % (1000 * (time() - t0)))
 
     def set_bgcolor(self, *args):
 
