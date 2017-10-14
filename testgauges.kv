@@ -1,0 +1,80 @@
+
+<TestGauges>:
+
+   g1: g1
+   g3: g3
+   clock: clock
+   tank_label: tank_label
+
+   GridLayout:
+      cols: 2
+
+      # First gauge, full size, default values
+      CanvasGauge:
+         id: g1
+         values: 0,
+
+      RelativeLayout:
+
+         # A clock!
+         CanvasGauge:
+            size_hint: .8, .8
+            pos_hint: {'x': .1, 'y': .1}
+            id: clock
+            values: root.hour, root.minute, root.second
+            begin: 90
+            end: -270
+            mini: -0
+            maxi: 60
+            labels: [(0, '')] + [(h*5, str(h)) for h in range(1, 13)]
+            needles_props: ({'width': 3, 'length': .6, 'color': (.5, .5, .5)}, {'width': 2, 'color': (.5, .5, .5)}, {'width': 1})
+
+      RelativeLayout:
+
+         Slider:
+            id: slider
+            orientation: 'vertical'
+            min: g2.mini
+            max: g2.maxi
+            size_hint: .6, .8
+            pos_hint: {'x': -.25, 'y': .1}
+            on_value: root.tank_changed(100 * self.value / self.max)
+
+         # Another gauge, value set by slider, reversed mini / maxi, custom labels, alarms
+         CanvasGauge:
+            id: g2
+            values: slider.value,
+            begin: -30
+            end: -150
+            mini: 0
+            maxi: 10
+            size_hint: .8, .8
+            pos_hint: {'x': .15, 'y': .1}
+            labels: ((0, 'Empty'), (5, 'Half'), (10, 'Full'))
+            alarms: ((0, 1.99, (1, 0, 0, .8)), (2, 4.99, (1, 0, 0, .5)), (5, 7.99, (0, 1, 0, .5)), (8, 10, (0, 1, 0, .8)))
+
+         Label:
+            id: tank_label
+            size_hint: .8, .8
+            pos_hint: {'x': .15, 'y': .2}
+            font_size: '24sp'
+            markup: True
+            canvas.before:
+               Color:
+                  rgba: 1, 1, 1, 1
+
+      RelativeLayout:
+
+         # Last gauge, right sided, with alarms
+         CanvasGauge:
+            size_hint: .8, .8
+            pos_hint: {'x': .1, 'y': .1}
+            id: g3
+            values: 0,
+            begin: 120
+            end: -120
+            mini: -40
+            maxi: 140
+            #alarms = ((mini, maxi, rgba), ...)
+            alarms: ((-1000, 20, (0, 0, 1, .5)), (21, 100, (0, 1, 0, .5)), (101, 200, (1, 0, 0, .5)))
+

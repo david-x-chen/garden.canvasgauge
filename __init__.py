@@ -74,7 +74,6 @@ class CanvasGauge(Widget):
 #        ))
 
     def __init__(self, **kwargs):
-        super(CanvasGauge, self).__init__(**kwargs)
         # /!\ Component properties are not available in __init__
         self._ready = False
         self._previous_values = []
@@ -86,6 +85,7 @@ class CanvasGauge(Widget):
                   size = self.update_canvas,
                   values = self.update_values)
         self.bind(values = self.set_bgcolor)
+        super(CanvasGauge, self).__init__(**kwargs)
 
     def update_canvas(self, *args):
 
@@ -216,26 +216,36 @@ class CanvasGauge(Widget):
             return
 
         for i, value in enumerate(self.values):
-             if self._previous_values[i] == value:
-                 continue
-             self._previous_values[i] = value
-             self.canvas.remove(self._needles[i])
-             needle_props = self._needles_props[i]
-             x1, y1 = ellipse(self._x0,
-                              self._y0,
-                              (self._e_width - 20) * needle_props['length'],
-                              (self._e_height - 20) * needle_props['length'],
-                              self.begin - (self._scale * (value - self.mini)))
-             self._needles[i] = InstructionGroup()
-             self._needles[i].add(needle_props['color'])
-             self._needles[i].add(Line(points = (x1,
-                                                 y1,
-                                                 self._x0,
-                                                 self._y0),
-                                     width = needle_props['width'],
-                                     cap = 'round',
-                                     close = False))
-             self.canvas.add(self._needles[i])
+            try:
+                if self._previous_values[i] == value:
+                    continue
+            except:
+                self._previous_values.append(value)
+                self._needles.append(InstructionGroup())
+                color = Color((i%3)*.5, ((i+1)%3)*.5, ((i+2)%3*.5))
+                length = 1.0
+                width = 2.0
+                self._needles_props.append({'color': color,
+                                      'width': width,
+                                      'length': length})
+            self._previous_values[i] = value
+            self.canvas.remove(self._needles[i])
+            needle_props = self._needles_props[i]
+            x1, y1 = ellipse(self._x0,
+                             self._y0,
+                             (self._e_width - 20) * needle_props['length'],
+                             (self._e_height - 20) * needle_props['length'],
+                             self.begin - (self._scale * (value - self.mini)))
+            self._needles[i] = InstructionGroup()
+            self._needles[i].add(needle_props['color'])
+            self._needles[i].add(Line(points = (x1,
+                                                y1,
+                                                self._x0,
+                                                self._y0),
+                                    width = needle_props['width'],
+                                    cap = 'round',
+                                    close = False))
+            self.canvas.add(self._needles[i])
 
     def set_bgcolor(self, *args):
 
